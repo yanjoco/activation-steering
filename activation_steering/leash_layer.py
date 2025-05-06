@@ -222,12 +222,14 @@ class LeashLayer(nn.Module):
             control = self.behavior_vector.to(dtype=hidden_states.dtype)
             if LeashLayer.forward_calls[self.layer_id] == 1:
                 if self.apply_behavior_on_first_call:
-                    hidden_states[0] = self.params.operator(hidden_states[0], control)
+                    # reshape for [batch, tok, d]
+                    hidden_states[:, 0] = self.params.operator(hidden_states[:, 0], control)
                 else:
                     log(f"    apply_behavior_on_first_call is False, skipping behavior vector application", class_name="LeashLayer")
             else:
-                hidden_states[0] = self.params.operator(hidden_states[0], control)
-                log(f"    Applying behavior vector to all tokens", class_name="LeashLayer")
+                # reshape for [batch, tok, d]
+                hidden_states[:, 0] = self.params.operator(hidden_states[:, 0], control)
+                log(f"    Applying behavior vector to CLS token for all batch examples", class_name="LeashLayer")
 
     def _apply_multi_behaviors(self, hidden_states):
         """
